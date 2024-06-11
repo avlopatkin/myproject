@@ -6,7 +6,6 @@ require 'db.php';
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $login = $_POST['login'];
     $password = $_POST['password'];
-    $name = $_POST['name'];
 
     $sql = "SELECT * FROM users WHERE login = :login";
     $stmt = $pdo->prepare($sql);
@@ -16,10 +15,11 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     if ($user && password_verify($password, $user['password'])) {
         $_SESSION['user_id'] = $user['id'];
         $_SESSION['login'] = $user['login'];
-        header('Location: profile.php');
+        $_SESSION['name'] = $user['name'];
+        header('Location: /profile.php');
         exit();
     } else {
-        echo "Неверный логин или пароль!";
+        $error = 'Wrong password or login';
     }
 }
 ?>
@@ -30,6 +30,11 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     <head>
         <meta charset="UTF-8">
         <title>Login</title>
+        <style>
+            .error {
+                color: red;
+            }
+        </style>
         <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css">
     </head>
     <body>
@@ -38,6 +43,11 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 <div class="col-md-12">
                     <h2>Login</h2>
                     <p>Please fill in your email and password.</p>
+                    <div class="error">
+                        <?php if (isset($error) && !empty($error)) : ?>
+                            <?= $error ?>
+                        <?php endif; ?>
+                    </div>
                     <form action="" method="post">
                         <div class="form-group">
                             <label>Email Address</label>
